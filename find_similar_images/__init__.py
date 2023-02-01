@@ -33,7 +33,8 @@ def assort_clones(search_directory, clone_directory, move_original_with_clones=F
 			else:
 				# add to hash dict
 				hash_dict[hashed_result] = path.join(search_directory, file)
-		except:
+		except Exception as e:
+			print("Skipped error; ", e)
 			pass
 
 search_directory = input("Input the filepath to search; ")
