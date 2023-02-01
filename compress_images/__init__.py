@@ -1,5 +1,7 @@
 from os import listdir, path, mkdir
-from PIL import Image
+from PIL import Image, ImageFile
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 valid_file_types = [".jpg", ".jpeg", ".png", ".webp", ".PNG", ".JPG", ".JPEG"]
 def isValidFileType(file):
@@ -31,7 +33,7 @@ def compress_filepaths(image_filepaths, out_directory):
 		while len(filepath_to_array_data.keys()) > 0:
 			key, temp_array = filepath_to_array_data.popitem()
 			(mode, size, byte_data) = tuple(temp_array)
-			# print(size, len(str(byte_data)))
+			print(size, len(str(byte_data)))
 			img = Image.frombytes(mode, size, byte_data)
 			img.save(out_directory + "/" + path.basename(key), optimize=True, quality=80)
 			img.close()

@@ -1,11 +1,7 @@
 
 from os import listdir, path
-from PIL import Image
-
-# for every file in the directory, hash it, and set the filepath as the value, and the hash as the key
-# if any files match an already existing one, move both images into a folder
-
-search_directory = input("Input the directory to sort; ")
+from PIL import Image, ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 valid_file_types = [".jpg", ".jpeg", ".png", ".webp", ".PNG", ".JPG", ".JPEG"]
 def isValidFileType(file):
@@ -14,18 +10,14 @@ def isValidFileType(file):
 			return True
 	return False
 
-for file in listdir(search_directory):
-	if isValidFileType(file):
-		img = Image.open( path.join(search_directory, file) )
-		width = str(img.width)
-		height = str(img.height)
+def assort_dir(directory, optimize=True): #, quality=80):
+	for file in listdir(directory):
+		if isValidFileType(file):
+			img = Image.open( path.join(directory, file), formats=None )
+			out_path = path.exists("dim_" + str(img.width) + "_" + str(img.height))
+			if not out_path:
+				path.mkdir(out_path)
+			img.save(path.join(out_path, file), optimize=optimize) #, quality=80)
 
-		if not path.exists("dim_" + width + "_" + height):
-			path.mkdir("dim_" + width + "_" + height)
-
-		filedata = None
-		with open(path.join(search_directory, file), "rb") as f:
-			filedata = f.read()
-
-		with open(path.join("dim_" + width + "_" + height, file), "wb") as f:
-			f.write(filedata)
+search_directory = input("Input the directory to sort; ")
+assort_dir(search_directory)
