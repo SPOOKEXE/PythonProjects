@@ -42,6 +42,17 @@ def compress_filepaths(image_filepaths, out_directory):
 				pass
 		print("Remaining Image Paths: " + str(len(image_filepaths)))
 
+	while len(filepath_to_array_data.keys()) > 0:
+		key, temp_array = filepath_to_array_data.popitem()
+		(mode, size, byte_data) = tuple(temp_array)
+		print(size, len(str(byte_data)))
+		try:
+			img = Image.frombytes(mode, size, byte_data)
+			img.save(out_directory + "/" + path.basename(key), optimize=True, quality=80)
+			img.close()
+		except:
+			pass
+
 def scan_directory_for_images(directory):
 	filepaths = []
 	for file in listdir(directory):
@@ -50,6 +61,7 @@ def scan_directory_for_images(directory):
 			filepaths.append(absPath)
 	return filepaths
 
-search_directory = input("Input the directory to compress; ")
-abs_paths = scan_directory_for_images(search_directory)
-compress_filepaths(abs_paths, path.join(search_directory, "compressed") )
+while True:
+	search_directory = input("Input the directory to compress; ")
+	abs_paths = scan_directory_for_images(search_directory)
+	compress_filepaths(abs_paths, path.join(search_directory, "compressed") )
