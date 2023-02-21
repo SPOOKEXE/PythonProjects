@@ -1,7 +1,5 @@
 
-from .image_hashing import dhash_z_transformed as hash_image
 from os import listdir, path, mkdir, rename, walk
-from concurrent import futures as futures
 from json import dumps
 
 WORKER_COUNT = 25
@@ -13,50 +11,16 @@ def isValidFileType(file):
 			return True
 	return False
 
-# multi-thread this
-def hash_image_from_filepath(filepath, hash_dict):
-	try:
-		hash_value = hash_image(filepath)
-		return does_dict_contain_hash(hash_value, hash_dict)
-	except:
-		pass
-	return False
-
-def does_dict_contain_hash(hash_value : str, hash_dict : dict) -> bool:
-	hash_value = str(hash_value)
-	splitA = hash_value[:4]
-	splitB = hash_value[4:]
-	if not hash_dict.get(splitA):
-		hash_dict[splitA] = []
-	does_contain = True
-	if hash_dict[splitA].count(hash_value) == 0:
-		hash_dict[splitA].append(splitB)
-		does_contain = False
-	return does_contain
-
-def find_clone_files(file_absolute_paths, output_directory, hash_dict = {}):
-	TOTAL_IMAGE_FILES = len(file_absolute_paths)
-	TOTAL_IMAGES_REMAINING = TOTAL_IMAGE_FILES
-	TOTAL_CLONE_IMAGES = 0
-
-	executor = futures.ThreadPoolExecutor(max_workers=WORKER_COUNT)
-
-	promises = []
+def find_clone_files(file_absolute_paths, output_directory):
+	counter = 1
 	for absfile in file_absolute_paths:
-		promises.append(executor.submit(hash_image_from_filepath, absfile, hash_dict))
+		_, head = path.split(absfile)
+		name, extension = path.splitext(head)
+		name.replace(".", "_")
+		rename( absfile, path.join(output_directory, str(counter) + extension) )
+		counter += 1
 
-	for promise in futures.as_completed(promises):
-		result = promise.result()
-		if result == True:
-			TOTAL_CLONE_IMAGES += 1
-			rename( absfile, path.join(output_directory, path.basename(absfile)) )
-		TOTAL_IMAGES_REMAINING -=1
-		print("Awaiting " + str(TOTAL_IMAGES_REMAINING) + " images to be compared - found " + str(TOTAL_CLONE_IMAGES) + " clones so far.")
-
-	with open('dump.json', 'w') as file:
-		file.write( dumps(hash_dict) )
-
-def assort_directory(search_directory, output_directory, hash_dict={}):
+def assort_directory(search_directory, output_directory):
 	if not path.exists(output_directory):
 		mkdir(output_directory)
 
@@ -66,9 +30,9 @@ def assort_directory(search_directory, output_directory, hash_dict={}):
 		if not isValidFileType(file):
 			continue
 		absolute_filepaths.append( path.join(search_directory, file) )
-	find_clone_files(absolute_filepaths, output_directory, hash_dict={})
+	find_clone_files(absolute_filepaths, output_directory)
 
-def assort_descendants(parent_directory, output_directory, hash_dict={}):
+def assort_descendants(parent_directory, output_directory):
 	if not path.exists(output_directory):
 		mkdir(output_directory)
 
@@ -79,7 +43,7 @@ def assort_descendants(parent_directory, output_directory, hash_dict={}):
 				continue
 			abspath = path.join(root, file)
 			absolute_filepaths.append( abspath )
-	find_clone_files(absolute_filepaths, output_directory, hash_dict=hash_dict)
+	find_clone_files(absolute_filepaths, output_directory)
 
 def default_switch_case_callback():
 	pass
