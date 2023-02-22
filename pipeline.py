@@ -1,5 +1,6 @@
 from os import rmdir, path
 from shutil import rmtree
+
 from find_clone_images import assort_descendants as duple_image_check
 from correct_duplicate_names import assort_descendants as dupe_name_check
 from compress_images import assort_descendants as compress_descendants
