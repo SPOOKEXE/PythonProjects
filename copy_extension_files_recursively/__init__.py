@@ -45,10 +45,14 @@ while True:
 		image_suffixes = AskForFileSuffixes()
 		folderpath = fd.askdirectory()
 		print("Scanning for ", image_suffixes, " in ", folderpath)
-		foundFiles = ScanRecursivelyForFiles(folderpath)
+		foundFiles : list[str] = ScanRecursivelyForFiles(folderpath, image_suffixes)
 		print(len(foundFiles), foundFiles)
-		for path in foundFiles:
-			shutil_copy(path, dest_dir)
+		i = 0
+		for abspath in foundFiles:
+			i += 1
+			_, tail = path.split(abspath)
+			_, ext = path.splitext(tail)
+			shutil_copy(abspath, path.join(dest_dir, str(i) + "_" + ext))
 		startfile(dest_dir)
 	else:
 		break
