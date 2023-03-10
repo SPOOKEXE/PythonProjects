@@ -27,24 +27,37 @@ def ExtractRarToDirectory(filepath : str, password=None, dest_dir=None) -> str:
 
 def UnRarDirectoryWithPassword(directory : str, password=None, dest_dir=None) -> list[str]:
 	directories = [ ]
-	for filename in listdir( directory ):
+	items = listdir( directory )
+	counter = 1
+	for filename in items:
+		print(counter, " / ", len(items))
 		filepath = path.join(directory, filename)
 		out_directory = ExtractRarToDirectory(filepath, password=password, dest_dir=dest_dir)
 		directories.append(out_directory)
+		counter += 1
 	return directories
 
 def UnRarDirectoryWithPasswordDict(directory : str, filename_to_pass : dict[str : str], dest_dir=None) -> list[str]:
 	directories = [ ]
+	counter = 1
+	keylen = len( filename_to_pass.keys() )
 	for filename, passw in filename_to_pass.items():
+		print( counter, " / ", keylen )
 		filepath = path.join(directory, filename)
 		out_directory = ExtractRarToDirectory(filepath, password=passw, dest_dir=dest_dir)
 		directories.append(out_directory)
+		counter += 1
 	return directories
 
 def ConvertRARToZip( rar_filepath : str, zip_filepath : str, password=None, deleteRAR=False ) -> str:
 	# if the filepath is not specified, create it based on the directory and filename
 	if zip_filepath == None:
 		zip_filepath = _get_replacement_dest_filepath(rar_filepath, ".zip")
+	if path.exists(zip_filepath):
+		# if wanted, delete the rar file
+		if deleteRAR == True:
+			remove(rar_filepath)
+		return zip_filepath
 	# get the temporary working directory for unpacking files
 	TEMP_DIRECTORY = path.join( path.dirname( rar_filepath ), "temporary" )
 	# make the directory if missing
@@ -69,22 +82,31 @@ def ConvertRARToZip( rar_filepath : str, zip_filepath : str, password=None, dele
 
 def ConvertRARsInDirectoryToZip( directory : str, password=None, deleteRARs=False ) -> list[str]:
 	directories = [ ]
-	for filename in listdir( directory ):
+	items = listdir( directory )
+	counter = 1
+	for filename in items:
+		print(counter, " / ", len(items))
 		filepath = path.join(directory, filename)
-		out_directory = ConvertRARToZip(filepath, password=password, deleteRAR=deleteRARs)
+		out_directory = ConvertRARToZip(filepath, None, password=password, deleteRAR=deleteRARs)
 		directories.append(out_directory)
+		counter += 1
 	return directories
 
 def ConvertRARPassDictInDirectoryToZip(directory : str, filename_to_pass : dict[str : str], dest_dir=None) -> list[str]:
 	directories = [ ]
+	counter = 1
+	item_len = len( filename_to_pass.keys() )
 	for filename, passw in filename_to_pass.items():
+		print(counter, " / ", item_len)
 		filepath = path.join(directory, filename)
-		out_directory = ConvertRARToZip(filepath, password=passw, dest_dir=dest_dir)
+		out_directory = ConvertRARToZip(filepath, None, password=passw, dest_dir=dest_dir)
 		directories.append(out_directory)
+		counter += 1
 	return directories
 
 if __name__ == '__main__':
-	basepath = "C:\\Users\\Declan\\Documents\\"
-	rarname = "HG1211 [Thomas Taihei].rar"
-	zipname = "HG1211 [Thomas Taihei].zip"
-	ConvertRARToZip( path.join(basepath, rarname), path.join(basepath, zipname) , password="Thomas@Taihei")
+	# basepath = "C:\\Users\\Declan\\Documents\\"
+	# rarname = "HG1211 [Thomas Taihei].rar"
+	# zipname = "HG1211 [Thomas Taihei].zip"
+	# ConvertRARToZip( path.join(basepath, rarname), path.join(basepath, zipname) , password="Thomas@Taihei")
+	ConvertRARsInDirectoryToZip("C:\\Users\\Declan\\Documents\\SmallerThan100MB", "Thomas@Taihei", deleteRARs=False)
